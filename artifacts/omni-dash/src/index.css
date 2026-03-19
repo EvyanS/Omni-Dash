@@ -1,0 +1,128 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@theme inline {
+  --font-sans: 'Plus Jakarta Sans', sans-serif;
+
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  
+  --color-surface: hsl(var(--surface));
+  --color-surface-foreground: hsl(var(--surface-foreground));
+  
+  --color-surface-variant: hsl(var(--surface-variant));
+  --color-on-surface-variant: hsl(var(--on-surface-variant));
+  
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  
+  --color-secondary-container: hsl(var(--secondary-container));
+  --color-on-secondary-container: hsl(var(--on-secondary-container));
+  
+  --color-outline: hsl(var(--outline));
+  --color-border: hsl(var(--border));
+  --color-ring: hsl(var(--primary));
+
+  --radius-m3: 24px;
+  --radius-m3-sm: 16px;
+  --radius-m3-lg: 28px;
+}
+
+:root {
+  --base-hue: 260;
+  
+  /* Light Theme Tonal Palette */
+  --background: var(--base-hue) 15% 99%;
+  --foreground: var(--base-hue) 30% 10%;
+
+  --surface: var(--base-hue) 20% 98%;
+  --surface-foreground: var(--base-hue) 30% 15%;
+
+  --surface-variant: var(--base-hue) 15% 93%;
+  --on-surface-variant: var(--base-hue) 25% 30%;
+
+  --primary: var(--base-hue) 80% 45%;
+  --primary-foreground: var(--base-hue) 100% 99%;
+
+  --secondary-container: var(--base-hue) 30% 90%;
+  --on-secondary-container: var(--base-hue) 60% 15%;
+
+  --outline: var(--base-hue) 15% 75%;
+  --border: var(--outline);
+}
+
+.dark {
+  /* Dark Theme Tonal Palette */
+  --background: var(--base-hue) 10% 6%;
+  --foreground: var(--base-hue) 20% 95%;
+
+  --surface: var(--base-hue) 15% 10%;
+  --surface-foreground: var(--base-hue) 20% 90%;
+
+  --surface-variant: var(--base-hue) 15% 15%;
+  --on-surface-variant: var(--base-hue) 20% 85%;
+
+  --primary: var(--base-hue) 80% 75%;
+  --primary-foreground: var(--base-hue) 60% 15%;
+
+  --secondary-container: var(--base-hue) 30% 25%;
+  --on-secondary-container: var(--base-hue) 30% 90%;
+
+  --outline: var(--base-hue) 15% 30%;
+  --border: var(--outline);
+}
+
+@layer base {
+  body {
+    @apply bg-background text-foreground font-sans antialiased overflow-x-hidden;
+    /* Ensure smooth transitions when theme/hue changes */
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+  
+  /* Custom Scrollbar for a more premium feel */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-outline/50 rounded-full;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-outline/80;
+  }
+}
+
+/* Base transitions for all M3 interactive surfaces */
+* {
+  @apply border-border;
+}
+
+input[type="search"]::-webkit-search-cancel-button {
+  display: none;
+}
+
+/* Custom range input styling for the hue slider */
+input[type=range].hue-slider {
+  -webkit-appearance: none;
+  width: 100%;
+  background: linear-gradient(to right, 
+    hsl(0, 80%, 60%), hsl(60, 80%, 60%), hsl(120, 80%, 60%), 
+    hsl(180, 80%, 60%), hsl(240, 80%, 60%), hsl(300, 80%, 60%), hsl(360, 80%, 60%));
+  border-radius: 9999px;
+  height: 12px;
+  outline: none;
+}
+input[type=range].hue-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: white;
+  border: 2px solid hsl(var(--primary));
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
