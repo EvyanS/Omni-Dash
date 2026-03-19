@@ -1,6 +1,6 @@
-import React, { useMemo, useEffect, useState } from 'react';
+import React, { useMemo, useEffect, useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, SearchX } from 'lucide-react';
+import { Plus, SearchX, Zap } from 'lucide-react';
 import { useDashboard } from '../hooks/use-dashboard';
 import { useTheme } from '../hooks/use-theme';
 import { TopBar } from '../components/TopBar';
@@ -8,23 +8,20 @@ import { Sidebar } from '../components/Sidebar';
 import { SiteCard } from '../components/SiteCard';
 import { SettingsPanel } from '../components/SettingsPanel';
 import { AddSiteModal } from '../components/AddSiteModal';
-import { CATEGORIES } from '../sites';
+import { ClockMode } from '../components/ClockMode';
+import { CATEGORIES, Site } from '../sites';
 
 const cardContainerVariants = {
   hidden: {},
   visible: {
-    transition: {
-      staggerChildren: 0.05,
-      delayChildren: 0.05,
-    },
+    transition: { staggerChildren: 0.05, delayChildren: 0.05 },
   },
 };
 
 const sectionHeadingVariants = {
   hidden: { x: -24, opacity: 0 },
   visible: {
-    x: 0,
-    opacity: 1,
+    x: 0, opacity: 1,
     transition: { type: 'spring', stiffness: 280, damping: 26 },
   },
 };
@@ -36,56 +33,121 @@ function AnimatedCount({ value }: { value: number }) {
     const step = Math.ceil(value / 12);
     const timer = setInterval(() => {
       start += step;
-      if (start >= value) {
-        setDisplay(value);
-        clearInterval(timer);
-      } else {
-        setDisplay(start);
-      }
+      if (start >= value) { setDisplay(value); clearInterval(timer); }
+      else setDisplay(start);
     }, 30);
     return () => clearInterval(timer);
   }, [value]);
   return <>{display}</>;
 }
 
+// ── Fuzzy search ────────────────────────────────────────────────────
+function fuzzyScore(query: string, text: string): number {
+  const q = query.toLowerCase();
+  const t = text.toLowerCase();
+  if (t.includes(q)) return 100 + (100 - q.length); // exact substring first
+  let qi = 0, score = 0;
+  for (let ti = 0; ti < t.length && qi < q.length; ti++) {
+    if (t[ti] === q[qi]) { score++; qi++; }
+  }
+  return qi === q.length ? (score / t.length) * 60 : 0;
+}
+
+function getMatchScore(query: string, site: Site): number {
+  if (!query) return 1;
+  return Math.max(
+    fuzzyScore(query, site.name) * 2,    // name weighted higher
+    fuzzyScore(query, site.description),
+    fuzzyScore(query, site.category),
+  );
+}
+
+// ── Auto-launch countdown bar ────────────────────────────────────────
+const AUTO_LAUNCH_MS = 1600;
+
+function AutoLaunchBar({ site, onCancel }: { site: Site; onCancel: () => void }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: -8 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -8 }}
+      className="fixed top-20 left-1/2 -translate-x-1/2 z-50 bg-primary text-primary-foreground px-5 py-2.5 rounded-full shadow-xl flex items-center gap-3 text-sm font-semibold"
+    >
+      <Zap size={15} className="shrink-0" />
+      <span>Launching <strong>{site.name}</strong>…</span>
+      <motion.div
+        className="h-1 bg-primary-foreground/40 rounded-full overflow-hidden w-20"
+      >
+        <motion.div
+          className="h-full bg-primary-foreground rounded-full"
+          initial={{ width: '0%' }}
+          animate={{ width: '100%' }}
+          transition={{ duration: AUTO_LAUNCH_MS / 1000, ease: 'linear' }}
+        />
+      </motion.div>
+      <button
+        onClick={onCancel}
+        className="text-primary-foreground/70 hover:text-primary-foreground transition-colors text-xs underline underline-offset-2"
+      >
+        cancel
+      </button>
+    </motion.div>
+  );
+}
+
 export function Dashboard() {
   const {
-    allSites,
-    pinnedIds,
-    searchQuery,
-    setSearchQuery,
-    togglePin,
-    addCustomSite,
-    removeCustomSite,
-    isSettingsOpen,
-    setIsSettingsOpen,
-    isAddSiteOpen,
-    setIsAddSiteOpen,
-    isMobileMenuOpen,
-    setIsMobileMenuOpen,
+    allSites, pinnedIds, searchQuery, setSearchQuery,
+    togglePin, addCustomSite, removeCustomSite,
+    isSettingsOpen, setIsSettingsOpen,
+    isAddSiteOpen, setIsAddSiteOpen,
+    isMobileMenuOpen, setIsMobileMenuOpen,
   } = useDashboard();
 
   const { hue, setHue, mode, toggleMode } = useTheme();
-  const [activeCategory, setActiveCategory] = React.useState('Favorites');
+  const [activeCategory, setActiveCategory] = useState('Favorites');
   const [fabHovered, setFabHovered] = useState(false);
+  const [isClockOpen, setIsClockOpen] = useState(false);
+  const [autoLaunchSite, setAutoLaunchSite] = useState<Site | null>(null);
+  const autoLaunchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // ── Fuzzy-filtered & scored sites ──────────────────────────────────
   const filteredSites = useMemo(() => {
-    const q = searchQuery.toLowerCase();
-    if (!q) return allSites;
-    return allSites.filter(
-      (site) =>
-        site.name.toLowerCase().includes(q) ||
-        site.description.toLowerCase().includes(q) ||
-        site.category.toLowerCase().includes(q)
-    );
+    if (!searchQuery) return allSites;
+    return allSites
+      .map((site) => ({ site, score: getMatchScore(searchQuery, site) }))
+      .filter(({ score }) => score > 0)
+      .sort((a, b) => b.score - a.score)
+      .map(({ site }) => site);
   }, [allSites, searchQuery]);
 
+  // ── Auto-launch when exactly 1 result ──────────────────────────────
+  useEffect(() => {
+    if (autoLaunchTimer.current) clearTimeout(autoLaunchTimer.current);
+    if (filteredSites.length === 1 && searchQuery.length > 1) {
+      const site = filteredSites[0];
+      setAutoLaunchSite(site);
+      autoLaunchTimer.current = setTimeout(() => {
+        window.open(site.url, '_blank', 'noopener,noreferrer');
+        setAutoLaunchSite(null);
+        setSearchQuery('');
+      }, AUTO_LAUNCH_MS);
+    } else {
+      setAutoLaunchSite(null);
+    }
+    return () => { if (autoLaunchTimer.current) clearTimeout(autoLaunchTimer.current); };
+  }, [filteredSites, searchQuery]);
+
+  const cancelAutoLaunch = () => {
+    if (autoLaunchTimer.current) clearTimeout(autoLaunchTimer.current);
+    setAutoLaunchSite(null);
+  };
+
+  // ── Group by category ──────────────────────────────────────────────
   const groupedSites = useMemo(() => {
     const groups: Record<string, typeof allSites> = {};
     const favorites = filteredSites.filter((s) => pinnedIds.includes(s.id));
-    if (favorites.length > 0 || searchQuery === '') {
-      groups['Favorites'] = favorites;
-    }
+    if (favorites.length > 0 || searchQuery === '') groups['Favorites'] = favorites;
     CATEGORIES.filter((c) => c !== 'Favorites').forEach((cat) => {
       const items = filteredSites.filter((s) => s.category === cat);
       if (items.length > 0) groups[cat] = items;
@@ -93,35 +155,23 @@ export function Dashboard() {
     return groups;
   }, [filteredSites, pinnedIds, searchQuery]);
 
+  // ── Scroll spy ─────────────────────────────────────────────────────
   const handleSelectCategory = (cat: string) => {
     setActiveCategory(cat);
-    const element = document.getElementById(`category-${cat}`);
-    if (element) {
-      const y = element.getBoundingClientRect().top + window.scrollY - 100;
-      window.scrollTo({ top: y, behavior: 'smooth' });
-    }
+    const el = document.getElementById(`category-${cat}`);
+    if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 100, behavior: 'smooth' });
   };
 
   useEffect(() => {
     const handleScroll = () => {
-      const categoryElements = CATEGORIES.map((cat) => ({
-        cat,
-        el: document.getElementById(`category-${cat}`),
-      })).filter((item) => item.el !== null);
-
-      let currentActive = CATEGORIES[0];
-      const offset = 120;
-
-      for (let i = categoryElements.length - 1; i >= 0; i--) {
-        const item = categoryElements[i];
-        if (item.el && window.scrollY >= item.el.offsetTop - offset) {
-          currentActive = item.cat;
-          break;
-        }
+      if (searchQuery) return;
+      const items = CATEGORIES.map((cat) => ({ cat, el: document.getElementById(`category-${cat}`) })).filter((i) => i.el);
+      let current = CATEGORIES[0];
+      for (let i = items.length - 1; i >= 0; i--) {
+        if (items[i].el && window.scrollY >= items[i].el!.offsetTop - 120) { current = items[i].cat; break; }
       }
-      if (!searchQuery) setActiveCategory(currentActive);
+      setActiveCategory(current);
     };
-
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, [searchQuery]);
@@ -133,7 +183,15 @@ export function Dashboard() {
         setSearchQuery={setSearchQuery}
         onOpenSettings={() => setIsSettingsOpen(true)}
         onToggleMobileMenu={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+        onOpenClock={() => setIsClockOpen(true)}
       />
+
+      {/* Auto-launch bar */}
+      <AnimatePresence>
+        {autoLaunchSite && (
+          <AutoLaunchBar site={autoLaunchSite} onCancel={cancelAutoLaunch} />
+        )}
+      </AnimatePresence>
 
       <div className="flex flex-1 pt-20 max-w-[2000px] mx-auto w-full">
         <Sidebar
@@ -161,24 +219,31 @@ export function Dashboard() {
                   <SearchX size={40} />
                 </motion.div>
                 <h2 className="text-2xl font-bold text-foreground mb-2">No apps found</h2>
-                <p className="text-on-surface-variant">
-                  Nothing matched "{searchQuery}"
-                </p>
-                <motion.button
-                  whileHover={{ scale: 1.04 }}
-                  whileTap={{ scale: 0.96 }}
-                  onClick={() => setSearchQuery('')}
-                  className="mt-6 px-6 py-2 rounded-full bg-secondary-container text-on-secondary-container font-semibold hover:bg-primary hover:text-primary-foreground transition-colors"
-                >
-                  Clear Search
-                </motion.button>
+                <p className="text-on-surface-variant mb-6">Nothing matched "{searchQuery}"</p>
+                <div className="flex flex-wrap gap-3 justify-center">
+                  <motion.button
+                    whileHover={{ scale: 1.04 }}
+                    whileTap={{ scale: 0.96 }}
+                    onClick={() => setSearchQuery('')}
+                    className="px-6 py-2.5 rounded-full bg-surface-variant text-on-surface-variant font-semibold hover:bg-secondary-container transition-colors"
+                  >
+                    Clear Search
+                  </motion.button>
+                  <motion.button
+                    whileHover={{ scale: 1.04 }}
+                    whileTap={{ scale: 0.96 }}
+                    onClick={() => { setSearchQuery(''); setIsAddSiteOpen(true); }}
+                    className="px-6 py-2.5 rounded-full bg-primary text-primary-foreground font-semibold shadow-lg shadow-primary/20 flex items-center gap-2 hover:bg-primary/90 transition-colors"
+                  >
+                    <Plus size={16} /> Add your own
+                  </motion.button>
+                </div>
               </motion.div>
             ) : (
               <motion.div key="grid" className="space-y-16">
                 {CATEGORIES.map((cat) => {
                   const sites = groupedSites[cat];
                   if (!sites || sites.length === 0) return null;
-
                   return (
                     <motion.section
                       key={cat}
@@ -188,14 +253,8 @@ export function Dashboard() {
                       viewport={{ once: true, margin: '-80px' }}
                       className="scroll-mt-28"
                     >
-                      {/* Section heading */}
-                      <motion.div
-                        variants={sectionHeadingVariants}
-                        className="flex items-center gap-4 mb-6"
-                      >
-                        <h2 className="text-2xl font-bold tracking-tight text-foreground">
-                          {cat}
-                        </h2>
+                      <motion.div variants={sectionHeadingVariants} className="flex items-center gap-4 mb-6">
+                        <h2 className="text-2xl font-bold tracking-tight text-foreground">{cat}</h2>
                         <motion.div
                           className="flex-1 h-px bg-gradient-to-r from-outline/30 to-transparent"
                           initial={{ scaleX: 0, originX: 0 }}
@@ -214,7 +273,6 @@ export function Dashboard() {
                         </motion.span>
                       </motion.div>
 
-                      {/* Cards grid with stagger */}
                       <motion.div
                         variants={cardContainerVariants}
                         className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 md:gap-5"
@@ -283,6 +341,8 @@ export function Dashboard() {
         onClose={() => setIsAddSiteOpen(false)}
         onAdd={addCustomSite}
       />
+
+      <ClockMode isOpen={isClockOpen} onClose={() => setIsClockOpen(false)} />
     </div>
   );
 }

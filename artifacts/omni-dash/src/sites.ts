@@ -109,6 +109,7 @@ export const DEFAULT_SITES: Site[] = [
   { id: "unsplash", name: "Unsplash", url: "https://unsplash.com", category: "Creative", description: "Free high-res stock photos", icon: "https://www.google.com/s2/favicons?sz=64&domain=unsplash.com" },
   { id: "pexels", name: "Pexels", url: "https://pexels.com", category: "Creative", description: "Free stock photos & video", icon: "https://www.google.com/s2/favicons?sz=64&domain=pexels.com" },
   { id: "pixlr", name: "Pixlr", url: "https://pixlr.com", category: "Creative", description: "Online photo editor", icon: "https://www.google.com/s2/favicons?sz=64&domain=pixlr.com" },
+  { id: "photopea", name: "Photopea", url: "https://photopea.com", category: "Creative", description: "Online Photoshop alternative", icon: "https://www.google.com/s2/favicons?sz=64&domain=photopea.com" },
 
   // Developer
   { id: "github", name: "GitHub", url: "https://github.com", category: "Developer", description: "Code hosting & collaboration", icon: "https://www.google.com/s2/favicons?sz=64&domain=github.com" },
@@ -203,4 +204,79 @@ export const DEFAULT_SITES: Site[] = [
   { id: "speedrun", name: "Speedrun.com", url: "https://speedrun.com", category: "Gaming", description: "Speedrunning records", icon: "https://www.google.com/s2/favicons?sz=64&domain=speedrun.com" },
   { id: "gamefaqs", name: "GameFAQs", url: "https://gamefaqs.gamespot.com", category: "Gaming", description: "Game guides & FAQs", icon: "https://www.google.com/s2/favicons?sz=64&domain=gamefaqs.gamespot.com" },
   { id: "howlongtobeat", name: "HowLongToBeat", url: "https://howlongtobeat.com", category: "Gaming", description: "Game completion times", icon: "https://www.google.com/s2/favicons?sz=64&domain=howlongtobeat.com" },
+  { id: "townscraper", name: "Townscraper", url: "https://oskarstalberg.com/Townscaper/", category: "Gaming", description: "Relaxing town building game", icon: "https://www.google.com/s2/favicons?sz=64&domain=oskarstalberg.com/Townscaper/" },
+  { id: "protondb", name: "ProtonDB", url: "https://protondb.com", category: "Gaming", description: "Linux gaming compatibility", icon: "https://www.google.com/s2/favicons?sz=64&domain=protondb.com" },
+  { id: "boardgamegeek", name: "BoardGameGeek", url: "https://boardgamegeek.com", category: "Gaming", description: "Board game database & community", icon: "https://www.google.com/s2/favicons?sz=64&domain=boardgamegeek.com" },
+  { id: "igdb", name: "IGDB", url: "https://igdb.com", category: "Gaming", description: "Internet Game Database", icon: "https://www.google.com/s2/favicons?sz=64&domain=igdb.com" },
+
+  // More Social
+  { id: "facebook", name: "Facebook", url: "https://facebook.com", category: "Social", description: "Social networking", icon: "https://www.google.com/s2/favicons?sz=64&domain=facebook.com" },
+  { id: "snapchat", name: "Snapchat", url: "https://snapchat.com", category: "Social", description: "Ephemeral photo & video sharing", icon: "https://www.google.com/s2/favicons?sz=64&domain=snapchat.com" },
+  { id: "threads", name: "Threads", url: "https://threads.net", category: "Social", description: "Text-based conversations by Meta", icon: "https://www.google.com/s2/favicons?sz=64&domain=threads.net" },
+
+  // More Finance
+  { id: "coinbase", name: "Coinbase", url: "https://coinbase.com", category: "Finance", description: "Buy & sell crypto", icon: "https://www.google.com/s2/favicons?sz=64&domain=coinbase.com" },
+  { id: "robinhood", name: "Robinhood", url: "https://robinhood.com", category: "Finance", description: "Commission-free investing", icon: "https://www.google.com/s2/favicons?sz=64&domain=robinhood.com" },
+  { id: "mint", name: "Mint", url: "https://mint.intuit.com", category: "Finance", description: "Budget & money tracking", icon: "https://www.google.com/s2/favicons?sz=64&domain=mint.intuit.com" },
+
+  // More News & Media
+  { id: "nytimes", name: "New York Times", url: "https://nytimes.com", category: "News & Media", description: "World-class journalism", icon: "https://www.google.com/s2/favicons?sz=64&domain=nytimes.com" },
+  { id: "ars", name: "Ars Technica", url: "https://arstechnica.com", category: "News & Media", description: "Tech, science & policy", icon: "https://www.google.com/s2/favicons?sz=64&domain=arstechnica.com" },
+  { id: "lobsters", name: "Lobste.rs", url: "https://lobste.rs", category: "News & Media", description: "Tech link aggregator", icon: "https://www.google.com/s2/favicons?sz=64&domain=lobste.rs" },
+
+  // More Learning
+  { id: "skillshare", name: "Skillshare", url: "https://skillshare.com", category: "Learning", description: "Creative online classes", icon: "https://www.google.com/s2/favicons?sz=64&domain=skillshare.com" },
+  { id: "lynda", name: "LinkedIn Learning", url: "https://linkedin.com/learning", category: "Learning", description: "Professional skills courses", icon: "https://www.google.com/s2/favicons?sz=64&domain=linkedin.com" },
+  { id: "w3schools", name: "W3Schools", url: "https://w3schools.com", category: "Learning", description: "Web development tutorials", icon: "https://www.google.com/s2/favicons?sz=64&domain=w3schools.com" },
+  { id: "exercism", name: "Exercism", url: "https://exercism.org", category: "Learning", description: "Code practice & mentorship", icon: "https://www.google.com/s2/favicons?sz=64&domain=exercism.org" },
+  { id: "leetcode", name: "LeetCode", url: "https://leetcode.com", category: "Learning", description: "Coding challenges & interview prep", icon: "https://www.google.com/s2/favicons?sz=64&domain=leetcode.com" },
+
+  // More Entertainment
+  { id: "hbomax", name: "Max", url: "https://max.com", category: "Entertainment", description: "HBO & Warner streaming", icon: "https://www.google.com/s2/favicons?sz=64&domain=max.com" },
+  { id: "appletv", name: "Apple TV+", url: "https://tv.apple.com", category: "Entertainment", description: "Apple originals", icon: "https://www.google.com/s2/favicons?sz=64&domain=tv.apple.com" },
+  { id: "crunchyroll", name: "Crunchyroll", url: "https://crunchyroll.com", category: "Entertainment", description: "Anime streaming", icon: "https://www.google.com/s2/favicons?sz=64&domain=crunchyroll.com" },
+  { id: "imdb", name: "IMDb", url: "https://imdb.com", category: "Entertainment", description: "Movies & TV database", icon: "https://www.google.com/s2/favicons?sz=64&domain=imdb.com" },
+
+  // More Shopping
+  { id: "walmart", name: "Walmart", url: "https://walmart.com", category: "Shopping", description: "Everyday low prices", icon: "https://www.google.com/s2/favicons?sz=64&domain=walmart.com" },
+  { id: "wayfair", name: "Wayfair", url: "https://wayfair.com", category: "Shopping", description: "Home furniture & decor", icon: "https://www.google.com/s2/favicons?sz=64&domain=wayfair.com" },
+  { id: "bestbuy", name: "Best Buy", url: "https://bestbuy.com", category: "Shopping", description: "Electronics & appliances", icon: "https://www.google.com/s2/favicons?sz=64&domain=bestbuy.com" },
+  { id: "uniqlo", name: "Uniqlo", url: "https://uniqlo.com", category: "Shopping", description: "Minimalist fashion", icon: "https://www.google.com/s2/favicons?sz=64&domain=uniqlo.com" },
+
+  // More Travel
+  { id: "google-flights", name: "Google Flights", url: "https://flights.google.com", category: "Travel", description: "Find & compare flights", icon: "https://www.google.com/s2/favicons?sz=64&domain=flights.google.com" },
+  { id: "expedia", name: "Expedia", url: "https://expedia.com", category: "Travel", description: "Flights, hotels & packages", icon: "https://www.google.com/s2/favicons?sz=64&domain=expedia.com" },
+  { id: "hostelworld", name: "Hostelworld", url: "https://hostelworld.com", category: "Travel", description: "Hostel booking", icon: "https://www.google.com/s2/favicons?sz=64&domain=hostelworld.com" },
+
+  // More Developer
+  { id: "cloudflare", name: "Cloudflare", url: "https://dash.cloudflare.com", category: "Developer", description: "DNS, CDN & security", icon: "https://www.google.com/s2/favicons?sz=64&domain=cloudflare.com" },
+  { id: "devdocs", name: "DevDocs", url: "https://devdocs.io", category: "Developer", description: "Unified API documentation", icon: "https://www.google.com/s2/favicons?sz=64&domain=devdocs.io" },
+  { id: "codepen", name: "CodePen", url: "https://codepen.io", category: "Developer", description: "Frontend code playground", icon: "https://www.google.com/s2/favicons?sz=64&domain=codepen.io" },
+  { id: "regex101", name: "Regex101", url: "https://regex101.com", category: "Developer", description: "Regex builder & debugger", icon: "https://www.google.com/s2/favicons?sz=64&domain=regex101.com" },
+  { id: "excalidraw", name: "Excalidraw", url: "https://excalidraw.com", category: "Developer", description: "Hand-drawn style diagrams", icon: "https://www.google.com/s2/favicons?sz=64&domain=excalidraw.com" },
+  { id: "jsonformatter", name: "JSON Formatter", url: "https://jsonformatter.curiousconcept.com", category: "Developer", description: "Format & validate JSON", icon: "https://www.google.com/s2/favicons?sz=64&domain=jsonformatter.curiousconcept.com" },
+
+  // More AI & Research
+  { id: "grok", name: "Grok", url: "https://grok.com", category: "AI & Research", description: "AI assistant by xAI", icon: "https://www.google.com/s2/favicons?sz=64&domain=grok.com" },
+  { id: "stability", name: "Stability AI", url: "https://stability.ai", category: "AI & Research", description: "Open generative AI models", icon: "https://www.google.com/s2/favicons?sz=64&domain=stability.ai" },
+  { id: "openrouter", name: "OpenRouter", url: "https://openrouter.ai", category: "AI & Research", description: "Unified AI model API", icon: "https://www.google.com/s2/favicons?sz=64&domain=openrouter.ai" },
+  { id: "together", name: "Together AI", url: "https://together.ai", category: "AI & Research", description: "Fast open-source AI inference", icon: "https://www.google.com/s2/favicons?sz=64&domain=together.ai" },
+
+  // More Creative
+  { id: "spline", name: "Spline", url: "https://spline.design", category: "Creative", description: "3D design for web", icon: "https://www.google.com/s2/favicons?sz=64&domain=spline.design" },
+  { id: "coolors", name: "Coolors", url: "https://coolors.co", category: "Creative", description: "Color palette generator", icon: "https://www.google.com/s2/favicons?sz=64&domain=coolors.co" },
+  { id: "fontawesome", name: "Font Awesome", url: "https://fontawesome.com", category: "Creative", description: "Icon library", icon: "https://www.google.com/s2/favicons?sz=64&domain=fontawesome.com" },
+  { id: "googlefonts", name: "Google Fonts", url: "https://fonts.google.com", category: "Creative", description: "Free web fonts", icon: "https://www.google.com/s2/favicons?sz=64&domain=fonts.google.com" },
+
+  // More Productivity
+  { id: "obsidian", name: "Obsidian", url: "https://obsidian.md", category: "Productivity", description: "Personal knowledge base", icon: "https://www.google.com/s2/favicons?sz=64&domain=obsidian.md" },
+  { id: "cron", name: "Cron", url: "https://cron.com", category: "Productivity", description: "Calendar for professionals", icon: "https://www.google.com/s2/favicons?sz=64&domain=cron.com" },
+  { id: "zapier", name: "Zapier", url: "https://zapier.com", category: "Productivity", description: "Workflow automation", icon: "https://www.google.com/s2/favicons?sz=64&domain=zapier.com" },
+  { id: "make", name: "Make", url: "https://make.com", category: "Productivity", description: "Visual automation platform", icon: "https://www.google.com/s2/favicons?sz=64&domain=make.com" },
+
+  // More Reference
+  { id: "stackexchange", name: "Stack Exchange", url: "https://stackexchange.com", category: "Reference", description: "Q&A network", icon: "https://www.google.com/s2/favicons?sz=64&domain=stackexchange.com" },
+  { id: "quora", name: "Quora", url: "https://quora.com", category: "Reference", description: "Questions & answers", icon: "https://www.google.com/s2/favicons?sz=64&domain=quora.com" },
+  { id: "arxiv", name: "arXiv", url: "https://arxiv.org", category: "Reference", description: "Preprint research papers", icon: "https://www.google.com/s2/favicons?sz=64&domain=arxiv.org" },
 ];
+
