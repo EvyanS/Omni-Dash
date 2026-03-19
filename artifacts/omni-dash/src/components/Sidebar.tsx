@@ -1,7 +1,7 @@
 import React from 'react';
 import { CATEGORIES } from '../sites';
 import { cn } from '../lib/utils';
-import { Star, Grid, X } from 'lucide-react';
+import { Star, Globe, Monitor, Briefcase, Brain, BookOpen, Palette, Code2, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface SidebarProps {
@@ -11,10 +11,21 @@ interface SidebarProps {
   onClose: () => void;
 }
 
+const CATEGORY_ICONS: Record<string, React.ReactNode> = {
+  'Favorites':    <Star size={18} />,
+  'Google':       <Globe size={18} />,
+  'Microsoft':    <Monitor size={18} />,
+  'Productivity': <Briefcase size={18} />,
+  'AI & Research':<Brain size={18} />,
+  'Reference':    <BookOpen size={18} />,
+  'Creative':     <Palette size={18} />,
+  'Developer':    <Code2 size={18} />,
+};
+
 export function Sidebar({ activeCategory, onSelectCategory, isOpen, onClose }: SidebarProps) {
   const handleSelect = (cat: string) => {
     onSelectCategory(cat);
-    onClose(); // Close mobile menu if open
+    onClose();
   };
 
   const content = (
@@ -43,7 +54,9 @@ export function Sidebar({ activeCategory, onSelectCategory, isOpen, onClose }: S
                   : "text-on-surface-variant hover:bg-surface-variant hover:text-foreground"
               )}
             >
-              {cat === 'Favorites' ? <Star size={18} className={isActive ? "fill-primary" : ""} /> : <Grid size={18} />}
+              <span className={isActive && cat === 'Favorites' ? '[&>svg]:fill-current' : ''}>
+                {CATEGORY_ICONS[cat] ?? <Globe size={18} />}
+              </span>
               {cat}
             </button>
           );

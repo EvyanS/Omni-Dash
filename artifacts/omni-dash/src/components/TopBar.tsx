@@ -27,10 +27,23 @@ export function TopBar({ searchQuery, setSearchQuery, onOpenSettings, onToggleMo
         >
           <Menu size={24} />
         </button>
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-xl bg-primary flex items-center justify-center text-primary-foreground font-bold text-xl shadow-lg shadow-primary/20">
-            O
-          </div>
+        <div className="flex items-center gap-2.5">
+          {/* Omni-Dash Logo */}
+          <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg" className="shrink-0 drop-shadow-md">
+            <rect width="36" height="36" rx="10" className="fill-primary" />
+            {/* Outer ring arc top-left */}
+            <path d="M8 18 A10 10 0 0 1 18 8" stroke="white" strokeWidth="2.5" strokeLinecap="round" opacity="0.5"/>
+            {/* Outer ring arc bottom-right */}
+            <path d="M28 18 A10 10 0 0 1 18 28" stroke="white" strokeWidth="2.5" strokeLinecap="round" opacity="0.5"/>
+            {/* Inner grid dots — 2x2 */}
+            <circle cx="14" cy="14" r="2.2" fill="white" />
+            <circle cx="22" cy="14" r="2.2" fill="white" opacity="0.75" />
+            <circle cx="14" cy="22" r="2.2" fill="white" opacity="0.75" />
+            <circle cx="22" cy="22" r="2.2" fill="white" />
+            {/* Center cross connector */}
+            <line x1="14" y1="14" x2="22" y2="22" stroke="white" strokeWidth="1.2" strokeLinecap="round" opacity="0.4" />
+            <line x1="22" y1="14" x2="14" y2="22" stroke="white" strokeWidth="1.2" strokeLinecap="round" opacity="0.4" />
+          </svg>
           <h1 className="text-xl font-bold tracking-tight text-foreground hidden sm:block">
             Omni-Dash
           </h1>
