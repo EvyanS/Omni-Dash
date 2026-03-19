@@ -64,6 +64,7 @@ export const DEFAULT_SITES: Site[] = [
   { id: "azure", name: "Azure Portal", url: "https://portal.azure.com", category: "Microsoft", description: "Cloud computing platform", icon: "https://www.google.com/s2/favicons?sz=64&domain=portal.azure.com" },
   { id: "mscopilot", name: "Microsoft Copilot", url: "https://copilot.microsoft.com", category: "Microsoft", description: "AI assistant by Microsoft", icon: "https://www.google.com/s2/favicons?sz=64&domain=copilot.microsoft.com" },
   { id: "msedge", name: "Microsoft Edge", url: "https://www.microsoft.com/edge", category: "Microsoft", description: "Microsoft's web browser", icon: "https://www.google.com/s2/favicons?sz=64&domain=microsoft.com" },
+  {id: "mclipchamp", name: "Clipchamp", url: "https://clipchamp.com", category: "Microsoft", description: "Video editing", icon: "https://www.google.com/s2/favicons?sz=64&domain=clipchamp.com"},
 
   // Productivity
   { id: "notion", name: "Notion", url: "https://notion.so", category: "Productivity", description: "All-in-one workspace", icon: "https://www.google.com/s2/favicons?sz=64&domain=notion.so" },
@@ -99,6 +100,9 @@ export const DEFAULT_SITES: Site[] = [
   { id: "you", name: "You.com", url: "https://you.com", category: "AI & Research", description: "AI-powered search engine", icon: "https://www.google.com/s2/favicons?sz=64&domain=you.com" },
   { id: "consensus", name: "Consensus", url: "https://consensus.app", category: "AI & Research", description: "Search scientific research with AI", icon: "https://www.google.com/s2/favicons?sz=64&domain=consensus.app" },
   { id: "scite", name: "Scite", url: "https://scite.ai", category: "AI & Research", description: "Smart citations for research papers", icon: "https://www.google.com/s2/favicons?sz=64&domain=scite.ai" },
+  { id: "runwayml", name: "Runway", url: "https://runwayml.com", category: "AI & Research", description: "AI video generation", icon: "https://www.google.com/s2/favicons?sz=64&domain=runwayml.com" },
+  { id: "elevenlabs", name: "ElevenLabs", url: "https://elevenlabs.io", category: "AI & Research", description: "AI voice cloning", icon: "https://www.google.com/s2/favicons?sz=64&domain=elevenlabs.io" },
+  { id: "leonardo", name: "Leonardo.ai", url: "https://leonardo.ai", category: "AI & Research", description: "Generative AI art", icon: "https://www.google.com/s2/favicons?sz=64&domain=leonardo.ai" },
 
   // Reference
   { id: "wikipedia", name: "Wikipedia", url: "https://wikipedia.org", category: "Reference", description: "Free encyclopedia", icon: "https://www.google.com/s2/favicons?sz=64&domain=wikipedia.org" },
@@ -108,6 +112,8 @@ export const DEFAULT_SITES: Site[] = [
   { id: "dictionary", name: "Dictionary.com", url: "https://dictionary.com", category: "Reference", description: "English dictionary & thesaurus", icon: "https://www.google.com/s2/favicons?sz=64&domain=dictionary.com" },
   { id: "britannica", name: "Britannica", url: "https://britannica.com", category: "Reference", description: "Encyclopedia Britannica", icon: "https://www.google.com/s2/favicons?sz=64&domain=britannica.com" },
   { id: "openlib", name: "Open Library", url: "https://openlibrary.org", category: "Reference", description: "Free book catalog", icon: "https://www.google.com/s2/favicons?sz=64&domain=openlibrary.org" },
+  { id: "wayback", name: "Wayback Machine", url: "https://web.archive.org", category: "Reference", description: "Explore the history of the web", icon: "https://www.google.com/s2/favicons?sz=64&domain=archive.org" },
+  { id: "quora", name: "Quora", url: "https://quora.com", category: "Reference", description: "Q&A platform", icon: "https://www.google.com/s2/favicons?sz=64&domain=quora.com" },
 
   // Creative
   { id: "canva", name: "Canva", url: "https://canva.com", category: "Creative", description: "Online design tool", icon: "https://www.google.com/s2/favicons?sz=64&domain=canva.com" },
@@ -125,6 +131,7 @@ export const DEFAULT_SITES: Site[] = [
   { id: "fontpair", name: "FontPair", url: "https://fontpair.co", category: "Creative", description: "Font combinations", icon: "https://www.google.com/s2/favicons?sz=64&domain=fontpair.co" },
   { id: "removebg", name: "remove.bg", url: "https://remove.bg", category: "Creative", description: "Remove image backgrounds", icon: "https://www.google.com/s2/favicons?sz=64&domain=remove.bg" },
   { id: "cleanup", name: "Cleanup.pictures", url: "https://cleanup.pictures", category: "Creative", description: "Remove objects from images", icon: "https://www.google.com/s2/favicons?sz=64&domain=cleanup.pictures" },
+  { id: "reactbits", name: "React Bits", url: "https://reactbits.dev", category: "Creative", description: "React code snippets", icon: "https://www.google.com/s2/favicons?sz=64&domain=reactbits.dev"},
 
   // Developer
   { id: "github", name: "GitHub", url: "https://github.com", category: "Developer", description: "Code hosting & collaboration", icon: "https://www.google.com/s2/favicons?sz=64&domain=github.com" },
@@ -145,6 +152,10 @@ export const DEFAULT_SITES: Site[] = [
   { id: "stackblitz", name: "StackBlitz", url: "https://stackblitz.com", category: "Developer", description: "Instant dev environments", icon: "https://www.google.com/s2/favicons?sz=64&domain=stackblitz.com" },
   { id: "glitch", name: "Glitch", url: "https://glitch.com", category: "Developer", description: "Remix and build apps fast", icon: "https://www.google.com/s2/favicons?sz=64&domain=glitch.com" },
   { id: "codeshare", name: "CodeShare", url: "https://codeshare.io", category: "Developer", description: "Real-time code sharing", icon: "https://www.google.com/s2/favicons?sz=64&domain=codeshare.io" },
+  { id: "caniuse", name: "Can I use...", url: "https://caniuse.com", category: "Developer", description: "Browser support tables", icon: "https://www.google.com/s2/favicons?sz=64&domain=caniuse.com" },
+  { id: "codepen", name: "CodePen", url: "https://codepen.io", category: "Developer", description: "Social development environment", icon: "https://www.google.com/s2/favicons?sz=64&domain=codepen.io" },
+  { id: "overapi", name: "OverAPI", url: "https://overapi.com", category: "Developer", description: "Cheat sheets for everything", icon: "https://www.google.com/s2/favicons?sz=64&domain=overapi.com" },
+  { id: "bundlephobia", name: "BundlePhobia", url: "https://bundlephobia.com", category: "Developer", description: "Cost of npm packages", icon: "https://www.google.com/s2/favicons?sz=64&domain=bundlephobia.com" },
 
   // Social
   { id: "twitter", name: "X (Twitter)", url: "https://x.com", category: "Social", description: "Microblogging & news", icon: "https://www.google.com/s2/favicons?sz=64&domain=x.com" },
@@ -168,6 +179,10 @@ export const DEFAULT_SITES: Site[] = [
   { id: "wise", name: "Wise", url: "https://wise.com", category: "Finance", description: "International transfers", icon: "https://www.google.com/s2/favicons?sz=64&domain=wise.com" },
   { id: "paypal", name: "PayPal", url: "https://paypal.com", category: "Finance", description: "Online payments", icon: "https://www.google.com/s2/favicons?sz=64&domain=paypal.com" },
   { id: "stripe", name: "Stripe Dashboard", url: "https://dashboard.stripe.com", category: "Finance", description: "Payment processing", icon: "https://www.google.com/s2/favicons?sz=64&domain=stripe.com" },
+  { id: "mint", name: "Mint", url: "https://mint.intuit.com", category: "Finance", description: "Budgeting tool", icon: "https://www.google.com/s2/favicons?sz=64&domain=mint.com" },
+  { id: "coinmarketcap", name: "CoinMarketCap", url: "https://coinmarketcap.com", category: "Finance", description: "Crypto market caps", icon: "https://www.google.com/s2/favicons?sz=64&domain=coinmarketcap.com" },
+  { id: "revolut", name: "Revolut", url: "https://revolut.com", category: "Finance", description: "Digital banking", icon: "https://www.google.com/s2/favicons?sz=64&domain=revolut.com" },
+
 
   // News & Media
   { id: "bbc", name: "BBC News", url: "https://bbc.com/news", category: "News & Media", description: "World news", icon: "https://www.google.com/s2/favicons?sz=64&domain=bbc.com" },
