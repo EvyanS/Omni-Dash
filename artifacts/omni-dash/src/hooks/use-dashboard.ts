@@ -17,6 +17,11 @@ export function useDashboard() {
   const [isAddSiteOpen, setIsAddSiteOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
+  const [fuzzySearch, setFuzzySearch] = useState<boolean>(() => {
+    const saved = localStorage.getItem('omni-fuzzy-search');
+    return saved === 'true';
+  });
+
   useEffect(() => {
     localStorage.setItem('omni-custom-sites', JSON.stringify(customSites));
   }, [customSites]);
@@ -24,6 +29,10 @@ export function useDashboard() {
   useEffect(() => {
     localStorage.setItem('omni-pinned-ids', JSON.stringify(pinnedIds));
   }, [pinnedIds]);
+
+  useEffect(() => {
+    localStorage.setItem('omni-fuzzy-search', String(fuzzySearch));
+  }, [fuzzySearch]);
 
   const allSites = useMemo(() => [...DEFAULT_SITES, ...customSites], [customSites]);
 
@@ -73,6 +82,8 @@ export function useDashboard() {
     isAddSiteOpen,
     setIsAddSiteOpen,
     isMobileMenuOpen,
-    setIsMobileMenuOpen
+    setIsMobileMenuOpen,
+    fuzzySearch,
+    setFuzzySearch,
   };
 }

@@ -9,9 +9,10 @@ interface TopBarProps {
   onOpenSettings: () => void;
   onToggleMobileMenu: () => void;
   onOpenClock: () => void;
+  fuzzySearch: boolean;
 }
 
-export function TopBar({ searchQuery, setSearchQuery, onOpenSettings, onToggleMobileMenu, onOpenClock }: TopBarProps) {
+export function TopBar({ searchQuery, setSearchQuery, onOpenSettings, onToggleMobileMenu, onOpenClock, fuzzySearch }: TopBarProps) {
   const [time, setTime] = useState(new Date());
   const [tick, setTick] = useState(true);
 
@@ -57,7 +58,7 @@ export function TopBar({ searchQuery, setSearchQuery, onOpenSettings, onToggleMo
           type="search"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder="Search apps, tools, or press '/'... (fuzzy)"
+          placeholder={fuzzySearch ? "Fuzzy search apps… (e.g. 'yt' → YouTube)" : "Search apps, tools, or press '/'…"}
           className="w-full h-12 bg-surface-variant focus:bg-surface rounded-full pl-12 pr-12 text-foreground placeholder:text-on-surface-variant focus:outline-none focus:ring-2 focus:ring-primary shadow-inner transition-all"
           whileFocus={{ scale: 1.01 }}
           transition={{ type: 'spring', stiffness: 400, damping: 30 }}

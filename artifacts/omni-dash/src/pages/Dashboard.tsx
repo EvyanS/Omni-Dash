@@ -102,6 +102,7 @@ export function Dashboard() {
     isSettingsOpen, setIsSettingsOpen,
     isAddSiteOpen, setIsAddSiteOpen,
     isMobileMenuOpen, setIsMobileMenuOpen,
+    fuzzySearch, setFuzzySearch,
   } = useDashboard();
 
   const { hue, setHue, mode, toggleMode } = useTheme();
@@ -111,15 +112,23 @@ export function Dashboard() {
   const [autoLaunchSite, setAutoLaunchSite] = useState<Site | null>(null);
   const autoLaunchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // ── Fuzzy-filtered & scored sites ──────────────────────────────────
+  // ── Filtered & scored sites ─────────────────────────────────────────
   const filteredSites = useMemo(() => {
     if (!searchQuery) return allSites;
+    const q = searchQuery.toLowerCase();
+    if (!fuzzySearch) {
+      return allSites.filter((s) =>
+        s.name.toLowerCase().includes(q) ||
+        s.description.toLowerCase().includes(q) ||
+        s.category.toLowerCase().includes(q)
+      );
+    }
     return allSites
       .map((site) => ({ site, score: getMatchScore(searchQuery, site) }))
       .filter(({ score }) => score > 0)
       .sort((a, b) => b.score - a.score)
       .map(({ site }) => site);
-  }, [allSites, searchQuery]);
+  }, [allSites, searchQuery, fuzzySearch]);
 
   // ── Auto-launch when exactly 1 result ──────────────────────────────
   useEffect(() => {
@@ -184,6 +193,7 @@ export function Dashboard() {
         onOpenSettings={() => setIsSettingsOpen(true)}
         onToggleMobileMenu={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
         onOpenClock={() => setIsClockOpen(true)}
+        fuzzySearch={fuzzySearch}
       />
 
       {/* Auto-launch bar */}
@@ -334,6 +344,8 @@ export function Dashboard() {
         setHue={setHue}
         mode={mode}
         toggleMode={toggleMode}
+        fuzzySearch={fuzzySearch}
+        setFuzzySearch={setFuzzySearch}
       />
 
       <AddSiteModal
