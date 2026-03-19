@@ -79,6 +79,10 @@ export const DEFAULT_SITES: Site[] = [
   { id: "monday", name: "Monday.com", url: "https://monday.com", category: "Productivity", description: "Work OS", icon: "https://www.google.com/s2/favicons?sz=64&domain=monday.com" },
   { id: "miro", name: "Miro", url: "https://miro.com", category: "Productivity", description: "Online whiteboard", icon: "https://www.google.com/s2/favicons?sz=64&domain=miro.com" },
   { id: "loom", name: "Loom", url: "https://loom.com", category: "Productivity", description: "Async video messaging", icon: "https://www.google.com/s2/favicons?sz=64&domain=loom.com" },
+  { id: "raycast", name: "Raycast", url: "https://raycast.com", category: "Productivity", description: "Productivity launcher", icon: "https://www.google.com/s2/favicons?sz=64&domain=raycast.com" },
+  { id: "readwise", name: "Readwise", url: "https://readwise.io", category: "Productivity", description: "Save & review highlights", icon: "https://www.google.com/s2/favicons?sz=64&domain=readwise.io" },
+  { id: "workflowy", name: "Workflowy", url: "https://workflowy.com", category: "Productivity", description: "Minimalist notes & lists", icon: "https://www.google.com/s2/favicons?sz=64&domain=workflowy.com" },
+  { id: "simplenote", name: "Simplenote", url: "https://simplenote.com", category: "Productivity", description: "Simple note-taking", icon: "https://www.google.com/s2/favicons?sz=64&domain=simplenote.com" },
 
   // AI & Research
   { id: "chatgpt", name: "ChatGPT", url: "https://chat.openai.com", category: "AI & Research", description: "AI assistant by OpenAI", icon: "https://www.google.com/s2/favicons?sz=64&domain=chat.openai.com" },
@@ -90,6 +94,11 @@ export const DEFAULT_SITES: Site[] = [
   { id: "mistral", name: "Mistral", url: "https://mistral.ai", category: "AI & Research", description: "Open AI models", icon: "https://www.google.com/s2/favicons?sz=64&domain=mistral.ai" },
   { id: "gscholar", name: "Google Scholar", url: "https://scholar.google.com", category: "AI & Research", description: "Academic search", icon: "https://www.google.com/s2/favicons?sz=64&domain=scholar.google.com" },
   { id: "elicit", name: "Elicit", url: "https://elicit.org", category: "AI & Research", description: "AI research assistant", icon: "https://www.google.com/s2/favicons?sz=64&domain=elicit.org" },
+  { id: "phind", name: "Phind", url: "https://phind.com", category: "AI & Research", description: "AI search engine for developers", icon: "https://www.google.com/s2/favicons?sz=64&domain=phind.com" },
+  { id: "poe", name: "Poe", url: "https://poe.com", category: "AI & Research", description: "Multiple AI models in one place", icon: "https://www.google.com/s2/favicons?sz=64&domain=poe.com" },
+  { id: "you", name: "You.com", url: "https://you.com", category: "AI & Research", description: "AI-powered search engine", icon: "https://www.google.com/s2/favicons?sz=64&domain=you.com" },
+  { id: "consensus", name: "Consensus", url: "https://consensus.app", category: "AI & Research", description: "Search scientific research with AI", icon: "https://www.google.com/s2/favicons?sz=64&domain=consensus.app" },
+  { id: "scite", name: "Scite", url: "https://scite.ai", category: "AI & Research", description: "Smart citations for research papers", icon: "https://www.google.com/s2/favicons?sz=64&domain=scite.ai" },
 
   // Reference
   { id: "wikipedia", name: "Wikipedia", url: "https://wikipedia.org", category: "Reference", description: "Free encyclopedia", icon: "https://www.google.com/s2/favicons?sz=64&domain=wikipedia.org" },
@@ -111,6 +120,11 @@ export const DEFAULT_SITES: Site[] = [
   { id: "pexels", name: "Pexels", url: "https://pexels.com", category: "Creative", description: "Free stock photos & video", icon: "https://www.google.com/s2/favicons?sz=64&domain=pexels.com" },
   { id: "pixlr", name: "Pixlr", url: "https://pixlr.com", category: "Creative", description: "Online photo editor", icon: "https://www.google.com/s2/favicons?sz=64&domain=pixlr.com" },
   { id: "photopea", name: "Photopea", url: "https://photopea.com", category: "Creative", description: "Online Photoshop alternative", icon: "https://www.google.com/s2/favicons?sz=64&domain=photopea.com" },
+  { id: "coolors", name: "Coolors", url: "https://coolors.co", category: "Creative", description: "Color palette generator", icon: "https://www.google.com/s2/favicons?sz=64&domain=coolors.co" },
+  { id: "colorhunt", name: "Color Hunt", url: "https://colorhunt.co", category: "Creative", description: "Curated color palettes", icon: "https://www.google.com/s2/favicons?sz=64&domain=colorhunt.co" },
+  { id: "fontpair", name: "FontPair", url: "https://fontpair.co", category: "Creative", description: "Font combinations", icon: "https://www.google.com/s2/favicons?sz=64&domain=fontpair.co" },
+  { id: "removebg", name: "remove.bg", url: "https://remove.bg", category: "Creative", description: "Remove image backgrounds", icon: "https://www.google.com/s2/favicons?sz=64&domain=remove.bg" },
+  { id: "cleanup", name: "Cleanup.pictures", url: "https://cleanup.pictures", category: "Creative", description: "Remove objects from images", icon: "https://www.google.com/s2/favicons?sz=64&domain=cleanup.pictures" },
 
   // Developer
   { id: "github", name: "GitHub", url: "https://github.com", category: "Developer", description: "Code hosting & collaboration", icon: "https://www.google.com/s2/favicons?sz=64&domain=github.com" },
@@ -125,6 +139,12 @@ export const DEFAULT_SITES: Site[] = [
   { id: "railway", name: "Railway", url: "https://railway.app", category: "Developer", description: "App deployment platform", icon: "https://www.google.com/s2/favicons?sz=64&domain=railway.app" },
   { id: "gitlab", name: "GitLab", url: "https://gitlab.com", category: "Developer", description: "DevOps platform", icon: "https://www.google.com/s2/favicons?sz=64&domain=gitlab.com" },
   { id: "supabase", name: "Supabase", url: "https://supabase.com", category: "Developer", description: "Open-source Firebase alternative", icon: "https://www.google.com/s2/favicons?sz=64&domain=supabase.com" },
+  { id: "devto", name: "DEV Community", url: "https://dev.to", category: "Developer", description: "Developer articles & community", icon: "https://www.google.com/s2/favicons?sz=64&domain=dev.to" },
+  { id: "hashnode", name: "Hashnode", url: "https://hashnode.com", category: "Developer", description: "Developer blogging platform", icon: "https://www.google.com/s2/favicons?sz=64&domain=hashnode.com" },
+  { id: "jsfiddle", name: "JSFiddle", url: "https://jsfiddle.net", category: "Developer", description: "Online JS playground", icon: "https://www.google.com/s2/favicons?sz=64&domain=jsfiddle.net" },
+  { id: "stackblitz", name: "StackBlitz", url: "https://stackblitz.com", category: "Developer", description: "Instant dev environments", icon: "https://www.google.com/s2/favicons?sz=64&domain=stackblitz.com" },
+  { id: "glitch", name: "Glitch", url: "https://glitch.com", category: "Developer", description: "Remix and build apps fast", icon: "https://www.google.com/s2/favicons?sz=64&domain=glitch.com" },
+  { id: "codeshare", name: "CodeShare", url: "https://codeshare.io", category: "Developer", description: "Real-time code sharing", icon: "https://www.google.com/s2/favicons?sz=64&domain=codeshare.io" },
 
   // Social
   { id: "twitter", name: "X (Twitter)", url: "https://x.com", category: "Social", description: "Microblogging & news", icon: "https://www.google.com/s2/favicons?sz=64&domain=x.com" },
@@ -169,6 +189,10 @@ export const DEFAULT_SITES: Site[] = [
   { id: "udemy", name: "Udemy", url: "https://udemy.com", category: "Learning", description: "Online learning marketplace", icon: "https://www.google.com/s2/favicons?sz=64&domain=udemy.com" },
   { id: "mit-ocw", name: "MIT OpenCourseWare", url: "https://ocw.mit.edu", category: "Learning", description: "Free MIT course materials", icon: "https://www.google.com/s2/favicons?sz=64&domain=ocw.mit.edu" },
   { id: "codecademy", name: "Codecademy", url: "https://codecademy.com", category: "Learning", description: "Interactive coding lessons", icon: "https://www.google.com/s2/favicons?sz=64&domain=codecademy.com" },
+  { id: "roadmap", name: "roadmap.sh", url: "https://roadmap.sh", category: "Learning", description: "Developer learning paths", icon: "https://www.google.com/s2/favicons?sz=64&domain=roadmap.sh" },
+  { id: "cs50", name: "CS50", url: "https://cs50.harvard.edu", category: "Learning", description: "Harvard computer science course", icon: "https://www.google.com/s2/favicons?sz=64&domain=cs50.harvard.edu" },
+  { id: "skillshare", name: "Skillshare", url: "https://skillshare.com", category: "Learning", description: "Creative courses", icon: "https://www.google.com/s2/favicons?sz=64&domain=skillshare.com" },
+  { id: "udacity", name: "Udacity", url: "https://udacity.com", category: "Learning", description: "Tech nanodegrees", icon: "https://www.google.com/s2/favicons?sz=64&domain=udacity.com" },
 
   // Entertainment
   { id: "netflix", name: "Netflix", url: "https://netflix.com", category: "Entertainment", description: "Streaming movies & TV", icon: "https://www.google.com/s2/favicons?sz=64&domain=netflix.com" },
