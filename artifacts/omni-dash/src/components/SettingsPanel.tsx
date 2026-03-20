@@ -243,8 +243,10 @@ export function SettingsPanel({
 
             <div className="p-6 border-t border-outline/10 bg-surface-variant/50">
               <p className="text-xs text-center text-on-surface-variant">
-                Omni-Dash · {new Date().getFullYear()} · All settings saved locally
+                Omni-Dash · {new Date().getFullYear()} · All settings saved locally<br></br>
+                Made by Evyan
               </p>
+              
             </div>
           </motion.div>
         </>

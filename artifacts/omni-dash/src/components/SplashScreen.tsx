@@ -77,7 +77,7 @@ export function SplashScreen({ onComplete }: SplashScreenProps) {
             transition={{ delay: 0.9, duration: 0.45, ease: [0.4, 0, 0.2, 1] }}
             className="mt-3 text-on-surface-variant text-sm font-medium tracking-wide"
           >
-            Your personal web command centre
+            The all in one dashboard
           </motion.p>
 
           {/* Progress bar */}
