@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { exec } from "child_process";
 import { promisify } from "util";
-import { existsSync, createReadStream, statSync } from "fs";
+import { existsSync, readFileSync, statSync } from "fs";
 import path from "path";
 
 const execAsync = promisify(exec);
@@ -10,7 +10,8 @@ const router = Router();
 const WORKSPACE_ROOT = path.resolve(import.meta.dirname, "..", "..", "..", "..");
 const DIST_PATH = path.join(WORKSPACE_ROOT, "artifacts", "omni-dash", "dist", "single", "index.html");
 
-// POST /api/export/omni-dash — builds & streams the file directly (no JSON wrapper)
+// POST /api/export/omni-dash — builds & returns the file as an octet-stream
+// Using application/octet-stream prevents any proxy from injecting extra content.
 router.post("/export/omni-dash", async (req, res) => {
   try {
     await execAsync(
@@ -23,12 +24,20 @@ router.post("/export/omni-dash", async (req, res) => {
       return;
     }
 
-    const stat = statSync(DIST_PATH);
-    res.setHeader("Content-Type", "text/html; charset=utf-8");
+    // Read and strip any Replit-injected banner scripts (defensive cleanup)
+    let html = readFileSync(DIST_PATH, "utf-8");
+    html = html.replace(/<script[^>]*replit[^>]*>[\s\S]*?<\/script>/gi, "");
+    html = html.replace(/<div[^>]*data-replit[^>]*>[\s\S]*?<\/div>/gi, "");
+
+    const buf = Buffer.from(html, "utf-8");
+
+    // Send as octet-stream so Replit's proxy doesn't treat this as an HTML
+    // page and won't inject its dev-banner or "Made with Replit" badge.
+    res.setHeader("Content-Type", "application/octet-stream");
     res.setHeader("Content-Disposition", 'attachment; filename="omni-dash.html"');
-    res.setHeader("Content-Length", stat.size);
+    res.setHeader("Content-Length", buf.byteLength);
     res.setHeader("Cache-Control", "no-store");
-    createReadStream(DIST_PATH).pipe(res);
+    res.end(buf);
   } catch (err: any) {
     if (!res.headersSent) {
       res.status(500).json({ error: err.message ?? "Build failed" });

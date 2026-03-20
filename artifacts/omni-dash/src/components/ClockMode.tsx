@@ -150,24 +150,27 @@ function AnalogClock() {
   const s = now.getSeconds();
   const m = now.getMinutes();
   const h = now.getHours() % 12;
+
+  // Degrees clockwise from 12 o'clock
   const secDeg = s * 6;
   const minDeg = m * 6 + s * 0.1;
   const hourDeg = h * 30 + m * 0.5;
 
-  const cx = 120, cy = 120, r = 100;
+  const cx = 100, cy = 100;
 
-  const hand = (deg: number, len: number, width: number, color: string) => {
-    const rad = ((deg - 90) * Math.PI) / 180;
-    return (
-      <motion.line
-        animate={{ rotate: deg }}
-        x1={cx} y1={cy}
-        x2={cx + len * Math.cos(rad)}
-        y2={cy + len * Math.sin(rad)}
-        stroke={color} strokeWidth={width} strokeLinecap="round"
-      />
-    );
-  };
+  // Correct SVG coords: x = cx + len·sin(θ), y = cy − len·cos(θ)
+  // where θ is the clockwise angle from 12 o'clock
+  const tip = (deg: number, len: number) => ({
+    x: cx + len * Math.sin((deg * Math.PI) / 180),
+    y: cy - len * Math.cos((deg * Math.PI) / 180),
+  });
+
+  const sec = tip(secDeg, 72);
+  const min = tip(minDeg, 62);
+  const hr  = tip(hourDeg, 44);
+
+  // Back-tail for second hand (opposite direction, shorter)
+  const secTail = tip(secDeg + 180, 16);
 
   return (
     <div className="flex flex-col items-center justify-center flex-1 gap-6 select-none">
@@ -175,39 +178,60 @@ function AnalogClock() {
         initial={{ opacity: 0, scale: 0.8 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ type: 'spring', stiffness: 200, damping: 22 }}
-        viewBox="0 0 240 240"
+        viewBox="0 0 200 200"
         className="w-[min(55vw,340px)] h-[min(55vw,340px)] drop-shadow-2xl"
       >
+        {/* Outer bezel */}
+        <circle cx={cx} cy={cy} r={98} className="fill-surface-variant" />
         {/* Face */}
-        <circle cx={cx} cy={cy} r={r + 15} className="fill-surface-variant" />
-        <circle cx={cx} cy={cy} r={r} className="fill-surface stroke-outline/20" strokeWidth="1" />
+        <circle cx={cx} cy={cy} r={88} className="fill-surface" stroke="currentColor" strokeWidth="0.5" style={{ color: 'hsl(var(--outline) / 0.2)' }} />
 
         {/* Hour markers */}
-        {Array.from({ length: 12 }).map((_, i) => {
-          const rad = ((i * 30 - 90) * Math.PI) / 180;
-          const isQuarter = i % 3 === 0;
-          const inner = isQuarter ? r - 18 : r - 10;
+        {Array.from({ length: 60 }).map((_, i) => {
+          const deg = i * 6;
+          const isHour = i % 5 === 0;
+          const inner = isHour ? (i % 15 === 0 ? 72 : 76) : 82;
+          const outer = 85;
+          const t1 = tip(deg, inner);
+          const t2 = tip(deg, outer);
           return (
             <line
               key={i}
-              x1={cx + inner * Math.cos(rad)} y1={cy + inner * Math.sin(rad)}
-              x2={cx + (r - 4) * Math.cos(rad)} y2={cy + (r - 4) * Math.sin(rad)}
-              className={isQuarter ? "stroke-foreground" : "stroke-on-surface-variant/50"}
-              strokeWidth={isQuarter ? 3 : 1.5}
+              x1={t1.x} y1={t1.y}
+              x2={t2.x} y2={t2.y}
+              strokeWidth={isHour ? (i % 15 === 0 ? 3.5 : 2) : 0.8}
               strokeLinecap="round"
+              className={isHour ? "stroke-foreground" : "stroke-on-surface-variant/30"}
             />
           );
         })}
 
-        {/* Hands */}
-        {hand(hourDeg, 52, 6, 'hsl(var(--primary-hue, 260) 50% 40%)')}
-        {hand(minDeg, 72, 4, 'hsl(var(--primary-hue, 260) 70% 45%)')}
-        {hand(secDeg, 80, 2, 'hsl(var(--primary-hue, 260) 90% 60%)')}
+        {/* Hour hand — thick, short */}
+        <line
+          x1={cx} y1={cy} x2={hr.x} y2={hr.y}
+          strokeWidth={7} strokeLinecap="round"
+          className="stroke-foreground"
+        />
 
-        {/* Center dot */}
-        <circle cx={cx} cy={cy} r={5} className="fill-primary" />
-        <circle cx={cx} cy={cy} r={2.5} fill="white" />
+        {/* Minute hand — medium */}
+        <line
+          x1={cx} y1={cy} x2={min.x} y2={min.y}
+          strokeWidth={4} strokeLinecap="round"
+          className="stroke-primary"
+        />
+
+        {/* Second hand — thin with tail */}
+        <line
+          x1={secTail.x} y1={secTail.y} x2={sec.x} y2={sec.y}
+          strokeWidth={1.8} strokeLinecap="round"
+          stroke="hsl(0 85% 55%)"
+        />
+
+        {/* Center cap */}
+        <circle cx={cx} cy={cy} r={7} className="fill-foreground" />
+        <circle cx={cx} cy={cy} r={4.5} stroke="hsl(0 85% 55%)" strokeWidth="1.5" className="fill-surface" />
       </motion.svg>
+
       <div className="text-center">
         <p className="text-2xl font-semibold text-foreground tabular-nums">{format(now, 'h:mm:ss a')}</p>
         <p className="text-on-surface-variant mt-1">{format(now, 'EEEE, MMMM d, yyyy')}</p>
