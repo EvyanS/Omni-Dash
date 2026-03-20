@@ -1,0 +1,167 @@
+Sure! Here's a step-by-step guide to add this loading animation to your Replit project:
+Adding the Loading Animation to Your Replit Project
+Step 1: Install Dependencies (if not already installed)
+
+Make sure you have these packages installed. In your Replit shell, run:
+
+npm install motion @mui/material @emotion/react @emotion/styled
+
+Step 2: Create the LoadingAnimation Component
+
+    In your project, create a new file at: src/app/components/LoadingAnimation.tsx
+    Copy and paste this code:
+
+import { useState, useEffect } from 'react';
+import { motion } from 'motion/react';
+import { useTheme } from '@mui/material/styles';
+
+export function LoadingAnimation({ onComplete }: { onComplete?: () => void }) {
+  const theme = useTheme();
+  const [animationComplete, setAnimationComplete] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setAnimationComplete(true);
+      onComplete?.();
+    }, 2500);
+
+    return () => clearTimeout(timer);
+  }, [onComplete]);
+
+  return (
+    <div 
+      className="fixed inset-0 flex items-center justify-center"
+      style={{
+        backgroundColor: theme.palette.background.default,
+      }}
+    >
+      <div className="flex items-center gap-4">
+        {/* Logo with spin animation */}
+        <motion.div
+          initial={{ rotate: 0, scale: 1 }}
+          animate={{ 
+            rotate: 360,
+            scale: [1, 1.1, 1],
+          }}
+          transition={{
+            duration: 0.8,
+            ease: [0.4, 0, 0.2, 1],
+            times: [0, 0.5, 1],
+          }}
+          className="flex-shrink-0"
+          style={{
+            filter: `drop-shadow(0 4px 12px ${theme.palette.primary.main}40)`,
+          }}
+        >
+          <svg width="56" height="56" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg" className="shrink-0">
+            <rect 
+              width="36" 
+              height="36" 
+              rx="10" 
+              fill={theme.palette.primary.main}
+            />
+            <path d="M8 18 A10 10 0 0 1 18 8" stroke="white" strokeWidth="2.5" strokeLinecap="round" opacity="0.5"/>
+            <path d="M28 18 A10 10 0 0 1 18 28" stroke="white" strokeWidth="2.5" strokeLinecap="round" opacity="0.5"/>
+            <circle cx="14" cy="14" r="2.2" fill="white" />
+            <circle cx="22" cy="14" r="2.2" fill="white" opacity="0.75" />
+            <circle cx="14" cy="22" r="2.2" fill="white" opacity="0.75" />
+            <circle cx="22" cy="22" r="2.2" fill="white" />
+            <line x1="14" y1="14" x2="22" y2="22" stroke="white" strokeWidth="1.2" strokeLinecap="round" opacity="0.4" />
+            <line x1="22" y1="14" x2="14" y2="22" stroke="white" strokeWidth="1.2" strokeLinecap="round" opacity="0.4" />
+          </svg>
+        </motion.div>
+
+        {/* Title with slide-out animation */}
+        <motion.div
+          initial={{ 
+            x: -50,
+            opacity: 0,
+          }}
+          animate={{ 
+            x: 0,
+            opacity: 1,
+          }}
+          transition={{
+            delay: 0.6,
+            duration: 0.6,
+            ease: [0.4, 0, 0.2, 1],
+          }}
+        >
+          <h1 
+            className="text-4xl font-semibold tracking-tight"
+            style={{
+              color: theme.palette.text.primary,
+            }}
+          >
+            Omni-Dash
+          </h1>
+        </motion.div>
+      </div>
+
+      {/* Optional: Loading progress indicator */}
+      <motion.div
+        className="absolute bottom-16 left-1/2"
+        initial={{ x: '-50%', opacity: 0 }}
+        animate={{ opacity: [0, 1, 1, 0] }}
+        transition={{
+          duration: 2.5,
+          times: [0, 0.1, 0.8, 1],
+        }}
+      >
+        <div 
+          className="w-48 h-1 rounded-full overflow-hidden"
+          style={{
+            backgroundColor: theme.palette.action.hover,
+          }}
+        >
+          <motion.div
+            className="h-full rounded-full"
+            style={{
+              backgroundColor: theme.palette.primary.main,
+            }}
+            initial={{ width: '0%' }}
+            animate={{ width: '100%' }}
+            transition={{
+              duration: 2.2,
+              ease: [0.4, 0, 0.2, 1],
+            }}
+          />
+        </div>
+      </motion.div>
+    </div>
+  );
+}
+
+Step 3: Update Your Main App Component
+
+In your main App.tsx (or wherever your app starts), add this logic:
+
+import { useState } from 'react';
+import { ThemeProvider } from '@mui/material/styles';
+import CssBaseline from '@mui/material/CssBaseline';
+import { LoadingAnimation } from './components/LoadingAnimation';
+
+export default function App() {
+  const [isLoading, setIsLoading] = useState(true);
+
+  return (
+    <ThemeProvider theme={yourExistingTheme}>
+      <CssBaseline />
+      {isLoading ? (
+        <LoadingAnimation onComplete={() => setIsLoading(false)} />
+      ) : (
+        // Your existing app content here
+        <YourMainContent />
+      )}
+    </ThemeProvider>
+  );
+}
+
+Step 4: Customize (Optional)
+
+    Animation duration: Change the 2500 ms timeout in LoadingAnimation.tsx
+    Colors: The logo automatically uses your M3 theme's primary color
+    Size: Adjust the SVG width and height attributes
+    Progress bar: Remove the bottom motion.div section if you don't want it
+
+That's it! The animation will play on every page load. 🎉

@@ -12,6 +12,11 @@ export function useDashboard() {
     return saved ? JSON.parse(saved) : [];
   });
 
+  const [recentlyUsed, setRecentlyUsed] = useState<Record<string, number>>(() => {
+    const saved = localStorage.getItem('omni-recently-used');
+    return saved ? JSON.parse(saved) : {};
+  });
+
   const [searchQuery, setSearchQuery] = useState('');
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isAddSiteOpen, setIsAddSiteOpen] = useState(false);
@@ -31,6 +36,10 @@ export function useDashboard() {
   }, [pinnedIds]);
 
   useEffect(() => {
+    localStorage.setItem('omni-recently-used', JSON.stringify(recentlyUsed));
+  }, [recentlyUsed]);
+
+  useEffect(() => {
     localStorage.setItem('omni-fuzzy-search', String(fuzzySearch));
   }, [fuzzySearch]);
 
@@ -40,6 +49,10 @@ export function useDashboard() {
     setPinnedIds((prev) =>
       prev.includes(id) ? prev.filter((p) => p !== id) : [...prev, id]
     );
+  };
+
+  const trackUsage = (id: string) => {
+    setRecentlyUsed((prev) => ({ ...prev, [id]: Date.now() }));
   };
 
   const addCustomSite = (site: Site) => {
@@ -72,6 +85,8 @@ export function useDashboard() {
     allSites,
     customSites,
     pinnedIds,
+    recentlyUsed,
+    trackUsage,
     searchQuery,
     setSearchQuery,
     togglePin,

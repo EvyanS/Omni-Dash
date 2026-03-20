@@ -1,4 +1,4 @@
-import React, { useMemo, useEffect, useState, useRef } from 'react';
+import React, { useMemo, useEffect, useState, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, SearchX, Zap } from 'lucide-react';
 import { useDashboard } from '../hooks/use-dashboard';
@@ -11,19 +11,9 @@ import { AddSiteModal } from '../components/AddSiteModal';
 import { ClockMode } from '../components/ClockMode';
 import { CATEGORIES, Site } from '../sites';
 
-const cardContainerVariants = {
-  hidden: {},
-  visible: {
-    transition: { staggerChildren: 0.05, delayChildren: 0.05 },
-  },
-};
-
 const sectionHeadingVariants = {
   hidden: { x: -24, opacity: 0 },
-  visible: {
-    x: 0, opacity: 1,
-    transition: { type: 'spring', stiffness: 280, damping: 26 },
-  },
+  visible: { x: 0, opacity: 1, transition: { type: 'spring', stiffness: 280, damping: 26 } },
 };
 
 function AnimatedCount({ value }: { value: number }) {
@@ -41,11 +31,11 @@ function AnimatedCount({ value }: { value: number }) {
   return <>{display}</>;
 }
 
-// ── Fuzzy search ────────────────────────────────────────────────────
+// ── Search scoring ───────────────────────────────────────────────────
 function fuzzyScore(query: string, text: string): number {
   const q = query.toLowerCase();
   const t = text.toLowerCase();
-  if (t.includes(q)) return 100 + (100 - q.length); // exact substring first
+  if (t.includes(q)) return 100 + (100 - q.length);
   let qi = 0, score = 0;
   for (let ti = 0; ti < t.length && qi < q.length; ti++) {
     if (t[ti] === q[qi]) { score++; qi++; }
@@ -53,16 +43,30 @@ function fuzzyScore(query: string, text: string): number {
   return qi === q.length ? (score / t.length) * 60 : 0;
 }
 
-function getMatchScore(query: string, site: Site): number {
-  if (!query) return 1;
+function simpleScore(query: string, text: string): number {
+  return text.toLowerCase().includes(query.toLowerCase()) ? 100 : 0;
+}
+
+function getBaseMatchScore(query: string, site: Site, fuzzy: boolean): number {
+  const scorer = fuzzy ? fuzzyScore : simpleScore;
+  const cats = site.categories ?? [site.category];
   return Math.max(
-    fuzzyScore(query, site.name) * 2,    // name weighted higher
-    fuzzyScore(query, site.description),
-    fuzzyScore(query, site.category),
+    scorer(query, site.name) * 2.5,
+    scorer(query, site.description),
+    ...cats.map((c) => scorer(query, c)),
   );
 }
 
-// ── Auto-launch countdown bar ────────────────────────────────────────
+function recencyBonus(id: string, recentlyUsed: Record<string, number>): number {
+  const t = recentlyUsed[id];
+  if (!t) return 0;
+  const age = Date.now() - t;
+  if (age < 30 * 60_000) return 10000;     // < 30 min
+  if (age < 2 * 3600_000) return 5000;     // < 2 h
+  if (age < 24 * 3600_000) return 1000;    // < 24 h
+  return 200;
+}
+
 const AUTO_LAUNCH_MS = 1600;
 
 function AutoLaunchBar({ site, onCancel }: { site: Site; onCancel: () => void }) {
@@ -75,19 +79,17 @@ function AutoLaunchBar({ site, onCancel }: { site: Site; onCancel: () => void })
     >
       <Zap size={15} className="shrink-0" />
       <span>Launching <strong>{site.name}</strong>…</span>
-      <motion.div
-        className="h-1 bg-primary-foreground/40 rounded-full overflow-hidden w-20"
-      >
+      <div className="h-1 bg-primary-foreground/30 rounded-full overflow-hidden w-20">
         <motion.div
           className="h-full bg-primary-foreground rounded-full"
           initial={{ width: '0%' }}
           animate={{ width: '100%' }}
           transition={{ duration: AUTO_LAUNCH_MS / 1000, ease: 'linear' }}
         />
-      </motion.div>
+      </div>
       <button
         onClick={onCancel}
-        className="text-primary-foreground/70 hover:text-primary-foreground transition-colors text-xs underline underline-offset-2"
+        className="text-primary-foreground/70 hover:text-primary-foreground text-xs underline underline-offset-2"
       >
         cancel
       </button>
@@ -97,7 +99,8 @@ function AutoLaunchBar({ site, onCancel }: { site: Site; onCancel: () => void })
 
 export function Dashboard() {
   const {
-    allSites, pinnedIds, searchQuery, setSearchQuery,
+    allSites, pinnedIds, recentlyUsed, trackUsage,
+    searchQuery, setSearchQuery,
     togglePin, addCustomSite, removeCustomSite,
     isSettingsOpen, setIsSettingsOpen,
     isAddSiteOpen, setIsAddSiteOpen,
@@ -105,30 +108,30 @@ export function Dashboard() {
     fuzzySearch, setFuzzySearch,
   } = useDashboard();
 
-  const { hue, setHue, mode, toggleMode } = useTheme();
+  const { hue, setHue, mode, toggleMode, autoTheme, setAutoTheme } = useTheme();
   const [activeCategory, setActiveCategory] = useState('Favorites');
   const [fabHovered, setFabHovered] = useState(false);
   const [isClockOpen, setIsClockOpen] = useState(false);
   const [autoLaunchSite, setAutoLaunchSite] = useState<Site | null>(null);
   const autoLaunchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // ── Filtered & scored sites ─────────────────────────────────────────
+  // ── Filtered & sorted sites ─────────────────────────────────────────
   const filteredSites = useMemo(() => {
-    if (!searchQuery) return allSites;
-    const q = searchQuery.toLowerCase();
-    if (!fuzzySearch) {
-      return allSites.filter((s) =>
-        s.name.toLowerCase().includes(q) ||
-        s.description.toLowerCase().includes(q) ||
-        s.category.toLowerCase().includes(q)
-      );
+    if (!searchQuery) {
+      // No query — show all, but sort recent to top within each category
+      return allSites.slice().sort((a, b) => recencyBonus(b.id, recentlyUsed) - recencyBonus(a.id, recentlyUsed));
     }
     return allSites
-      .map((site) => ({ site, score: getMatchScore(searchQuery, site) }))
-      .filter(({ score }) => score > 0)
-      .sort((a, b) => b.score - a.score)
-      .map(({ site }) => site);
-  }, [allSites, searchQuery, fuzzySearch]);
+      .map((site) => {
+        const matchScore = getBaseMatchScore(searchQuery, site, fuzzySearch);
+        if (matchScore === 0) return null;
+        const score = matchScore + recencyBonus(site.id, recentlyUsed) + (pinnedIds.includes(site.id) ? 500 : 0);
+        return { site, score };
+      })
+      .filter(Boolean)
+      .sort((a, b) => b!.score - a!.score)
+      .map((x) => x!.site);
+  }, [allSites, searchQuery, fuzzySearch, recentlyUsed, pinnedIds]);
 
   // ── Auto-launch when exactly 1 result ──────────────────────────────
   useEffect(() => {
@@ -138,6 +141,7 @@ export function Dashboard() {
       setAutoLaunchSite(site);
       autoLaunchTimer.current = setTimeout(() => {
         window.open(site.url, '_blank', 'noopener,noreferrer');
+        trackUsage(site.id);
         setAutoLaunchSite(null);
         setSearchQuery('');
       }, AUTO_LAUNCH_MS);
@@ -152,13 +156,28 @@ export function Dashboard() {
     setAutoLaunchSite(null);
   };
 
+  // ── Enter key: launch top result ───────────────────────────────────
+  const handleSearchEnter = useCallback(() => {
+    if (filteredSites.length > 0) {
+      const top = filteredSites[0];
+      window.open(top.url, '_blank', 'noopener,noreferrer');
+      trackUsage(top.id);
+      setSearchQuery('');
+      setAutoLaunchSite(null);
+      if (autoLaunchTimer.current) clearTimeout(autoLaunchTimer.current);
+    }
+  }, [filteredSites, trackUsage, setSearchQuery]);
+
   // ── Group by category ──────────────────────────────────────────────
   const groupedSites = useMemo(() => {
-    const groups: Record<string, typeof allSites> = {};
+    const groups: Record<string, Site[]> = {};
     const favorites = filteredSites.filter((s) => pinnedIds.includes(s.id));
-    if (favorites.length > 0 || searchQuery === '') groups['Favorites'] = favorites;
+    if (favorites.length > 0 || !searchQuery) groups['Favorites'] = favorites;
     CATEGORIES.filter((c) => c !== 'Favorites').forEach((cat) => {
-      const items = filteredSites.filter((s) => s.category === cat);
+      const items = filteredSites.filter((s) => {
+        const cats = s.categories ?? [s.category];
+        return cats.includes(cat);
+      });
       if (items.length > 0) groups[cat] = items;
     });
     return groups;
@@ -185,6 +204,8 @@ export function Dashboard() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [searchQuery]);
 
+  const topResultId = searchQuery ? filteredSites[0]?.id : undefined;
+
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col selection:bg-primary/20">
       <TopBar
@@ -194,9 +215,9 @@ export function Dashboard() {
         onToggleMobileMenu={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
         onOpenClock={() => setIsClockOpen(true)}
         fuzzySearch={fuzzySearch}
+        onSearchEnter={handleSearchEnter}
       />
 
-      {/* Auto-launch bar */}
       <AnimatePresence>
         {autoLaunchSite && (
           <AutoLaunchBar site={autoLaunchSite} onCancel={cancelAutoLaunch} />
@@ -232,16 +253,14 @@ export function Dashboard() {
                 <p className="text-on-surface-variant mb-6">Nothing matched "{searchQuery}"</p>
                 <div className="flex flex-wrap gap-3 justify-center">
                   <motion.button
-                    whileHover={{ scale: 1.04 }}
-                    whileTap={{ scale: 0.96 }}
+                    whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}
                     onClick={() => setSearchQuery('')}
                     className="px-6 py-2.5 rounded-full bg-surface-variant text-on-surface-variant font-semibold hover:bg-secondary-container transition-colors"
                   >
                     Clear Search
                   </motion.button>
                   <motion.button
-                    whileHover={{ scale: 1.04 }}
-                    whileTap={{ scale: 0.96 }}
+                    whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}
                     onClick={() => { setSearchQuery(''); setIsAddSiteOpen(true); }}
                     className="px-6 py-2.5 rounded-full bg-primary text-primary-foreground font-semibold shadow-lg shadow-primary/20 flex items-center gap-2 hover:bg-primary/90 transition-colors"
                   >
@@ -283,23 +302,27 @@ export function Dashboard() {
                         </motion.span>
                       </motion.div>
 
-                      <motion.div
-                        variants={cardContainerVariants}
-                        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 md:gap-5"
-                      >
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 md:gap-5">
                         <AnimatePresence>
-                          {sites.map((site, i) => (
-                            <SiteCard
-                              key={`${cat}-${site.id}`}
-                              site={site}
-                              isPinned={pinnedIds.includes(site.id)}
-                              onTogglePin={togglePin}
-                              onRemoveCustom={removeCustomSite}
-                              index={i}
-                            />
-                          ))}
+                          {sites.map((site, i) => {
+                            const lastUsed = recentlyUsed[site.id];
+                            const isRecent = lastUsed ? (Date.now() - lastUsed) < 2 * 3600_000 : false;
+                            return (
+                              <SiteCard
+                                key={`${cat}-${site.id}`}
+                                site={site}
+                                isPinned={pinnedIds.includes(site.id)}
+                                onTogglePin={togglePin}
+                                onRemoveCustom={removeCustomSite}
+                                onLaunch={trackUsage}
+                                index={i}
+                                isRecent={isRecent}
+                                isTopResult={searchQuery.length > 0 && site.id === topResultId}
+                              />
+                            );
+                          })}
                         </AnimatePresence>
-                      </motion.div>
+                      </div>
                     </motion.section>
                   );
                 })}
@@ -309,7 +332,7 @@ export function Dashboard() {
         </main>
       </div>
 
-      {/* FAB with tooltip */}
+      {/* FAB */}
       <div className="fixed bottom-8 right-8 z-40 flex flex-col items-center gap-2">
         <AnimatePresence>
           {fabHovered && (
@@ -317,7 +340,6 @@ export function Dashboard() {
               initial={{ opacity: 0, y: 8, scale: 0.9 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 8, scale: 0.9 }}
-              transition={{ type: 'spring', stiffness: 380, damping: 28 }}
               className="bg-foreground text-background text-xs font-semibold px-3 py-1.5 rounded-full shadow-lg whitespace-nowrap pointer-events-none"
             >
               Add shortcut
@@ -331,7 +353,6 @@ export function Dashboard() {
           onHoverEnd={() => setFabHovered(false)}
           onClick={() => setIsAddSiteOpen(true)}
           className="w-16 h-16 bg-primary text-primary-foreground rounded-2xl shadow-xl shadow-primary/30 flex items-center justify-center hover:bg-primary/90 transition-colors"
-          title="Add custom shortcut"
         >
           <Plus size={28} />
         </motion.button>
@@ -344,6 +365,8 @@ export function Dashboard() {
         setHue={setHue}
         mode={mode}
         toggleMode={toggleMode}
+        autoTheme={autoTheme}
+        setAutoTheme={setAutoTheme}
         fuzzySearch={fuzzySearch}
         setFuzzySearch={setFuzzySearch}
       />

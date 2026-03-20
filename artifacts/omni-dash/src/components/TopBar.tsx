@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Search, Settings, X, Menu, Clock } from 'lucide-react';
 import { format } from 'date-fns';
 import { motion } from 'framer-motion';
@@ -10,11 +10,16 @@ interface TopBarProps {
   onToggleMobileMenu: () => void;
   onOpenClock: () => void;
   fuzzySearch: boolean;
+  onSearchEnter: () => void;
 }
 
-export function TopBar({ searchQuery, setSearchQuery, onOpenSettings, onToggleMobileMenu, onOpenClock, fuzzySearch }: TopBarProps) {
+export function TopBar({
+  searchQuery, setSearchQuery, onOpenSettings, onToggleMobileMenu,
+  onOpenClock, fuzzySearch, onSearchEnter,
+}: TopBarProps) {
   const [time, setTime] = useState(new Date());
   const [tick, setTick] = useState(true);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -23,6 +28,17 @@ export function TopBar({ searchQuery, setSearchQuery, onOpenSettings, onToggleMo
     }, 1000);
     return () => clearInterval(timer);
   }, []);
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      onSearchEnter();
+    }
+    if (e.key === 'Escape') {
+      setSearchQuery('');
+      inputRef.current?.blur();
+    }
+  };
 
   return (
     <header className="fixed top-0 left-0 right-0 h-20 bg-background/80 backdrop-blur-xl border-b border-outline/10 z-40 flex items-center px-4 md:px-8 gap-4 shadow-sm">
@@ -51,22 +67,23 @@ export function TopBar({ searchQuery, setSearchQuery, onOpenSettings, onToggleMo
         </div>
       </div>
 
-      <div className="flex-1 max-w-2xl mx-auto flex items-center relative group">
-        <Search className="absolute left-4 w-5 h-5 text-on-surface-variant/70 group-focus-within:text-primary transition-colors" />
-        <motion.input
+      <div className="flex-1 max-w-2xl mx-auto flex items-center relative">
+        {/* Search icon — z-10 so it always sits above the input */}
+        <Search className="absolute left-4 z-10 w-5 h-5 text-on-surface-variant/70 pointer-events-none transition-colors peer-focus:text-primary" />
+        <input
+          ref={inputRef}
           id="global-search"
           type="search"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder={fuzzySearch ? "Fuzzy search apps… (e.g. 'yt' → YouTube)" : "Search apps, tools, or press '/'…"}
-          className="w-full h-12 bg-surface-variant focus:bg-surface rounded-full pl-12 pr-12 text-foreground placeholder:text-on-surface-variant focus:outline-none focus:ring-2 focus:ring-primary shadow-inner transition-all"
-          whileFocus={{ scale: 1.01 }}
-          transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+          onKeyDown={handleKeyDown}
+          placeholder={fuzzySearch ? "Fuzzy search… 'yt' → YouTube — Enter to launch" : "Search apps or press '/' — Enter to launch"}
+          className="peer w-full h-12 bg-surface-variant focus:bg-surface rounded-full pl-12 pr-12 text-foreground placeholder:text-on-surface-variant/60 focus:outline-none focus:ring-2 focus:ring-primary shadow-inner transition-all"
         />
         {searchQuery && (
           <button
-            onClick={() => setSearchQuery('')}
-            className="absolute right-4 p-1 rounded-full text-on-surface-variant hover:text-foreground hover:bg-outline/20 transition-colors"
+            onClick={() => { setSearchQuery(''); inputRef.current?.focus(); }}
+            className="absolute right-4 z-10 p-1 rounded-full text-on-surface-variant hover:text-foreground hover:bg-outline/20 transition-colors"
           >
             <X size={16} />
           </button>
@@ -74,7 +91,6 @@ export function TopBar({ searchQuery, setSearchQuery, onOpenSettings, onToggleMo
       </div>
 
       <div className="w-64 shrink-0 flex items-center justify-end gap-2 md:gap-3">
-        {/* Clock button — click to open full clock mode */}
         <motion.button
           whileHover={{ scale: 1.04 }}
           whileTap={{ scale: 0.92 }}
@@ -98,13 +114,11 @@ export function TopBar({ searchQuery, setSearchQuery, onOpenSettings, onToggleMo
           </span>
         </motion.button>
 
-        {/* Clock icon for mobile */}
         <motion.button
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
           onClick={onOpenClock}
           className="md:hidden w-11 h-11 rounded-full flex items-center justify-center bg-surface-variant hover:bg-secondary-container text-foreground transition-colors"
-          title="Open clock mode"
         >
           <Clock size={20} />
         </motion.button>

@@ -2,7 +2,10 @@ export interface Site {
   id: string;
   name: string;
   url: string;
+  /** Primary category (used for grouping in the sidebar/grid) */
   category: string;
+  /** Optional extra categories this site also belongs to */
+  categories?: string[];
   description: string;
   icon?: string;
   pinned?: boolean;

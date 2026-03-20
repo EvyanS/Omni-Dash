@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Moon, Sun, Palette, Search, Download, Loader2, CheckCircle, AlertCircle } from 'lucide-react';
+import {
+  X, Moon, Sun, Palette, Search, Download, Loader2,
+  CheckCircle, AlertCircle, Clock, Sunrise,
+} from 'lucide-react';
 import { cn } from '../lib/utils';
 
 interface SettingsPanelProps {
@@ -10,79 +13,65 @@ interface SettingsPanelProps {
   setHue: (hue: number) => void;
   mode: 'light' | 'dark';
   toggleMode: () => void;
+  autoTheme: boolean;
+  setAutoTheme: (v: boolean) => void;
   fuzzySearch: boolean;
   setFuzzySearch: (v: boolean) => void;
 }
 
 type ExportStatus = 'idle' | 'building' | 'done' | 'error';
 
-function Toggle({ checked, onChange, label }: { checked: boolean; onChange: (v: boolean) => void; label?: string }) {
+function Toggle({ checked, onChange }: { checked: boolean; onChange: (v: boolean) => void }) {
   return (
     <button
       role="switch"
       aria-checked={checked}
       onClick={() => onChange(!checked)}
       className={cn(
-        "relative w-12 h-6 rounded-full transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary",
+        "relative w-12 h-6 rounded-full transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary shrink-0",
         checked ? "bg-primary" : "bg-outline/30"
       )}
     >
+      {/* Use animate x instead of conditional Tailwind classes to avoid mis-render */}
       <motion.span
-        layout
+        className="absolute top-1 left-1 w-4 h-4 rounded-full bg-white shadow"
+        animate={{ x: checked ? 24 : 0 }}
         transition={{ type: 'spring', stiffness: 500, damping: 35 }}
-        className={cn(
-          "absolute top-1 w-4 h-4 rounded-full bg-white shadow",
-          checked ? "left-7" : "left-1"
-        )}
       />
     </button>
   );
 }
 
 export function SettingsPanel({
-  isOpen, onClose, hue, setHue, mode, toggleMode, fuzzySearch, setFuzzySearch
+  isOpen, onClose, hue, setHue, mode, toggleMode,
+  autoTheme, setAutoTheme, fuzzySearch, setFuzzySearch,
 }: SettingsPanelProps) {
   const [exportStatus, setExportStatus] = useState<ExportStatus>('idle');
   const [exportMsg, setExportMsg] = useState('');
 
   const handleExport = async () => {
     setExportStatus('building');
-    setExportMsg('Starting build…');
+    setExportMsg('Building… this takes ~20s');
     try {
       const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       const apiBase = base.replace(/\/[^/]+$/, '');
-      const res = await fetch(`${apiBase}/api/export/omni-dash`);
-      if (!res.ok || !res.body) throw new Error('Request failed');
-
-      const reader = res.body.getReader();
-      const decoder = new TextDecoder();
-
-      while (true) {
-        const { value, done } = await reader.read();
-        if (done) break;
-        const chunk = decoder.decode(value);
-        for (const line of chunk.split('\n')) {
-          if (!line.startsWith('data:')) continue;
-          const payload = JSON.parse(line.slice(5).trim());
-          if (payload.error) throw new Error(payload.error);
-          if (payload.msg) setExportMsg(payload.msg);
-          if (payload.done && payload.b64) {
-            const bytes = atob(payload.b64);
-            const arr = new Uint8Array(bytes.length);
-            for (let i = 0; i < bytes.length; i++) arr[i] = bytes.charCodeAt(i);
-            const blob = new Blob([arr], { type: 'text/html' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'omni-dash.html';
-            a.click();
-            URL.revokeObjectURL(url);
-            setExportStatus('done');
-            setExportMsg('Downloaded! Open omni-dash.html in any browser.');
-            setTimeout(() => { setExportStatus('idle'); setExportMsg(''); }, 5000);
-          }
-        }
+      const res = await fetch(`${apiBase}/api/export/omni-dash`, { method: 'POST' });
+      if (!res.ok) {
+        const json = await res.json().catch(() => ({}));
+        throw new Error(json.error ?? `HTTP ${res.status}`);
       }
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'omni-dash.html';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      setExportStatus('done');
+      setExportMsg('Downloaded! Open omni-dash.html in any browser — no server needed.');
+      setTimeout(() => { setExportStatus('idle'); setExportMsg(''); }, 6000);
     } catch (err: any) {
       setExportStatus('error');
       setExportMsg(err.message ?? 'Build failed');
@@ -127,26 +116,37 @@ export function SettingsPanel({
                   <h3>Theme Mode</h3>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
-                  <button
-                    onClick={() => mode !== 'light' && toggleMode()}
-                    className={`py-3 px-4 rounded-xl border-2 font-medium transition-all ${
-                      mode === 'light'
-                        ? 'border-primary bg-primary/5 text-primary'
-                        : 'border-outline/20 hover:border-outline text-on-surface-variant hover:bg-surface-variant'
-                    }`}
-                  >
-                    Light
-                  </button>
-                  <button
-                    onClick={() => mode !== 'dark' && toggleMode()}
-                    className={`py-3 px-4 rounded-xl border-2 font-medium transition-all ${
-                      mode === 'dark'
-                        ? 'border-primary bg-primary/5 text-primary'
-                        : 'border-outline/20 hover:border-outline text-on-surface-variant hover:bg-surface-variant'
-                    }`}
-                  >
-                    Dark
-                  </button>
+                  {(['light', 'dark'] as const).map((m) => (
+                    <button
+                      key={m}
+                      onClick={() => { if (!autoTheme && mode !== m) toggleMode(); }}
+                      disabled={autoTheme}
+                      className={cn(
+                        "py-3 px-4 rounded-xl border-2 font-medium transition-all capitalize",
+                        mode === m
+                          ? "border-primary bg-primary/5 text-primary"
+                          : "border-outline/20 hover:border-outline text-on-surface-variant hover:bg-surface-variant",
+                        autoTheme && "opacity-40 cursor-not-allowed"
+                      )}
+                    >
+                      {m}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Auto theme */}
+                <div className="bg-surface-variant rounded-2xl p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium text-foreground text-sm flex items-center gap-1.5">
+                        <Sunrise size={14} /> Auto Light/Dark
+                      </p>
+                      <p className="text-xs text-on-surface-variant mt-0.5">
+                        Light 7am–7pm, dark outside those hours
+                      </p>
+                    </div>
+                    <Toggle checked={autoTheme} onChange={setAutoTheme} />
+                  </div>
                 </div>
               </div>
 
@@ -180,11 +180,13 @@ export function SettingsPanel({
                   <Search size={20} />
                   <h3>Search</h3>
                 </div>
-                <div className="bg-surface-variant rounded-2xl p-4 space-y-1">
-                  <div className="flex items-center justify-between">
+                <div className="bg-surface-variant rounded-2xl p-4">
+                  <div className="flex items-start justify-between gap-3">
                     <div>
                       <p className="font-medium text-foreground text-sm">Fuzzy Search</p>
-                      <p className="text-xs text-on-surface-variant mt-0.5">Match partial & out-of-order characters (e.g. "yt" → YouTube)</p>
+                      <p className="text-xs text-on-surface-variant mt-0.5">
+                        Match partial & out-of-order characters (e.g. "yt" → YouTube)
+                      </p>
                     </div>
                     <Toggle checked={fuzzySearch} onChange={setFuzzySearch} />
                   </div>
@@ -199,7 +201,7 @@ export function SettingsPanel({
                 </div>
                 <div className="bg-surface-variant rounded-2xl p-4 space-y-3">
                   <p className="text-sm text-on-surface-variant">
-                    Download a single self-contained <strong className="text-foreground">omni-dash.html</strong> file — no server needed. Open it directly in any browser, even offline.
+                    Download a single self-contained <strong className="text-foreground">omni-dash.html</strong> — open it anywhere, even offline.
                   </p>
                   <motion.button
                     whileHover={{ scale: exportStatus === 'building' ? 1 : 1.02 }}
@@ -216,7 +218,7 @@ export function SettingsPanel({
                   >
                     {exportStatus === 'idle' && <><Download size={16} /> Download HTML</>}
                     {exportStatus === 'building' && <><Loader2 size={16} className="animate-spin" /> Building…</>}
-                    {exportStatus === 'done' && <><CheckCircle size={16} /> Done!</>}
+                    {exportStatus === 'done' && <><CheckCircle size={16} /> Downloaded!</>}
                     {exportStatus === 'error' && <><AlertCircle size={16} /> Failed</>}
                   </motion.button>
                   <AnimatePresence>
